@@ -1,0 +1,1852 @@
+# React.js — 50 Interview Questions and Answers
+
+## 1. What is React and why is it used?
+
+React is a JavaScript library used to build user interfaces (UIs). It follows a component-based and declarative approach and uses a virtual DOM to efficiently update the UI.
+
+React is popular because:
+
+* Components are reusable.
+* It provides a large ecosystem.
+* One-way data flow makes state management more predictable.
+* It makes building interactive UIs easier.
+
+---
+
+## 2. What is the Virtual DOM and how does it improve performance?
+
+The Virtual DOM is a lightweight, in-memory representation of the actual DOM.
+
+When the state of a component changes, React creates a new Virtual DOM tree and compares it with the previous one. This process is called **reconciliation**.
+
+React then determines the minimum required changes and applies them to the actual DOM.
+
+```text
+State Change
+     ↓
+New Virtual DOM
+     ↓
+Compare with Previous Virtual DOM
+     ↓
+Reconciliation / Diffing
+     ↓
+Required DOM Changes
+     ↓
+Actual DOM Update
+```
+
+This helps avoid unnecessary DOM operations.
+
+---
+
+## 3. What is JSX?
+
+JSX stands for JavaScript XML. It is a syntax extension that allows us to write HTML-like markup inside JavaScript.
+
+Example:
+
+```jsx
+const element = <h1>Hello World</h1>;
+```
+
+JSX is transformed by the build toolchain into JavaScript that creates React elements.
+
+JSX makes UI code more readable and easier to maintain.
+
+---
+
+## 4. What is the difference between Functional and Class Components?
+
+### Functional Components
+
+Functional components are JavaScript functions that return JSX.
+
+```jsx
+function Welcome() {
+  return <h1>Hello World</h1>;
+}
+```
+
+They use Hooks such as `useState` and `useEffect` to manage state and side effects.
+
+### Class Components
+
+Class components extend `React.Component` and use `this.state` and lifecycle methods.
+
+```jsx
+class Welcome extends React.Component {
+  render() {
+    return <h1>Hello World</h1>;
+  }
+}
+```
+
+### Difference
+
+| Functional Components | Class Components               |
+| --------------------- | ------------------------------ |
+| JavaScript functions  | JavaScript classes             |
+| Use Hooks             | Use lifecycle methods          |
+| Less boilerplate      | More boilerplate               |
+| Modern approach       | Mostly used in older codebases |
+
+Today, functional components with Hooks are the standard approach for most new React applications.
+
+---
+
+## 5. What is the difference between Props and State?
+
+### Props
+
+Props are data passed from a parent component to a child component.
+
+```text
+Parent
+   │
+   │ Props
+   ↓
+Child
+```
+
+Props are read-only from the child's perspective.
+
+Example:
+
+```jsx
+function User({ name }) {
+  return <h1>{name}</h1>;
+}
+
+<User name="Pawan" />
+```
+
+### State
+
+State is internal data managed by a component.
+
+```jsx
+const [count, setCount] = useState(0);
+```
+
+When state changes, React can re-render the component.
+
+| Props                            | State                 |
+| -------------------------------- | --------------------- |
+| Passed from parent               | Managed by component  |
+| Read-only from child perspective | Can be updated        |
+| Used to pass data                | Used for dynamic data |
+| Parent-controlled                | Component-controlled  |
+
+---
+
+## 6. Explain the lifecycle of Class Components.
+
+A class component has three main lifecycle phases:
+
+```text
+             Component
+                 │
+       ┌─────────┼─────────┐
+       ↓         ↓         ↓
+   Mounting   Updating  Unmounting
+```
+
+### Mounting
+
+The component is created and inserted into the DOM.
+
+```text
+constructor
+     ↓
+render
+     ↓
+componentDidMount
+```
+
+### Updating
+
+Occurs when props or state change.
+
+```text
+shouldComponentUpdate
+          ↓
+        render
+          ↓
+componentDidUpdate
+```
+
+### Unmounting
+
+Occurs when the component is removed from the DOM.
+
+```text
+componentWillUnmount
+```
+
+For error handling, React also provides methods such as:
+
+* `getDerivedStateFromError`
+* `componentDidCatch`
+
+---
+
+## 7. What is `useState` and how does it work?
+
+`useState` is a React Hook that allows functional components to manage local state.
+
+```jsx
+const [count, setCount] = useState(0);
+```
+
+It returns:
+
+```text
+[count, setCount]
+    │       │
+    │       └── State update function
+    └────────── Current state
+```
+
+Example:
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <>
+      <p>{count}</p>
+
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+    </>
+  );
+}
+```
+
+Calling `setCount()` schedules a state update, after which React can re-render the component with the new state.
+
+---
+
+## 8. What is `useEffect` and how does the dependency array work?
+
+`useEffect` is used to handle side effects in functional components.
+
+Common examples include:
+
+* API requests
+* Timers
+* Subscriptions
+* Event listeners
+* Browser APIs
+
+Example:
+
+```jsx
+useEffect(() => {
+  // Side effect
+}, []);
+```
+
+### Dependency Array
+
+```jsx
+useEffect(() => {
+  // Runs after the initial mount
+}, []);
+```
+
+An empty dependency array generally means the effect does not re-run because of changing dependencies.
+
+```jsx
+useEffect(() => {
+  // Runs when count changes
+}, [count]);
+```
+
+Without a dependency array:
+
+```jsx
+useEffect(() => {
+  // Runs after renders
+});
+```
+
+### Cleanup
+
+An effect can return a cleanup function:
+
+```jsx
+useEffect(() => {
+  const id = setInterval(() => {
+    console.log("Running...");
+  }, 1000);
+
+  return () => {
+    clearInterval(id);
+  };
+}, []);
+```
+
+The cleanup runs before the effect re-runs due to changed dependencies and when the component unmounts.
+
+---
+
+## 9. What is the difference between `useEffect` and `useLayoutEffect`?
+
+### `useEffect`
+
+`useEffect` generally runs after the browser has painted the updated UI.
+
+It is commonly used for:
+
+* API calls
+* Subscriptions
+* Timers
+* Logging
+
+### `useLayoutEffect`
+
+`useLayoutEffect` runs synchronously after DOM updates but before the browser paints.
+
+It is useful when you need to:
+
+* Measure the DOM
+* Read layout information
+* Make DOM changes before the user sees the result
+* Avoid certain visual flickers
+
+```text
+Render
+  ↓
+DOM Update
+  ↓
+useLayoutEffect
+  ↓
+Browser Paint
+  ↓
+useEffect
+```
+
+---
+
+## 10. What is `useContext` and when should you use it?
+
+`useContext` allows a component to access a Context value without passing it through every intermediate component.
+
+It is useful for data that needs to be shared across many components.
+
+Examples:
+
+* Theme
+* Authentication information
+* Language
+* Application configuration
+
+```text
+Context Provider
+       │
+       ├── Header
+       ├── Dashboard
+       └── Profile
+```
+
+This helps avoid unnecessary prop drilling.
+
+---
+
+## 11. What is `useRef` used for?
+
+`useRef` stores a mutable value that persists between renders without causing a re-render when the value changes.
+
+```jsx
+const valueRef = useRef(0);
+```
+
+It can also be used to access DOM elements directly.
+
+```jsx
+const inputRef = useRef(null);
+
+<input ref={inputRef} />
+```
+
+Then:
+
+```jsx
+inputRef.current.focus();
+```
+
+Common use cases include:
+
+* Accessing DOM elements
+* Storing timer IDs
+* Storing previous values
+* Keeping mutable values between renders
+
+---
+
+## 12. What is the difference between `useMemo` and `useCallback`?
+
+### `useMemo`
+
+`useMemo` memoizes a **computed value**.
+
+```jsx
+const result = useMemo(() => {
+  return expensiveCalculation(data);
+}, [data]);
+```
+
+### `useCallback`
+
+`useCallback` memoizes a **function reference**.
+
+```jsx
+const handleClick = useCallback(() => {
+  console.log("Clicked");
+}, []);
+```
+
+Easy way to remember:
+
+```text
+useMemo
+   ↓
+Memoized Value
+
+useCallback
+   ↓
+Memoized Function
+```
+
+These should be used when they provide a real performance benefit rather than being added everywhere.
+
+---
+
+## 13. What are Custom Hooks and why are they used?
+
+Custom Hooks are reusable JavaScript functions whose names usually start with `use`.
+
+Example:
+
+```jsx
+function useFetch(url) {
+  // Reusable fetching logic
+}
+```
+
+The same logic can then be reused by multiple components.
+
+```text
+              useFetch()
+               /     \
+              ↓       ↓
+        Component A  Component B
+```
+
+Benefits:
+
+* Logic reuse
+* Less duplicate code
+* Cleaner components
+* Better separation of concerns
+
+---
+
+## 14. What are the Rules of Hooks?
+
+There are two main Rules of Hooks.
+
+### Rule 1: Only call Hooks at the top level
+
+Do not call Hooks inside:
+
+* Loops
+* Conditions
+* Nested functions
+
+Incorrect:
+
+```jsx
+if (isLoggedIn) {
+  useState();
+}
+```
+
+### Rule 2: Only call Hooks from React functions
+
+Hooks should be called from:
+
+* React function components
+* Custom Hooks
+
+These rules ensure that Hooks are called in the same order on every render.
+
+---
+
+## 15. What is Prop Drilling and how can it be avoided?
+
+Prop drilling occurs when data is passed through multiple intermediate components even though those components do not need the data themselves.
+
+```text
+App
+ ↓
+Component A
+ ↓
+Component B
+ ↓
+Component C
+ ↓
+Component D
+```
+
+If `App` has data required only by `Component D`, the data may have to be passed through A, B, and C.
+
+Possible solutions:
+
+* Context API
+* Redux or other state-management libraries
+* Component composition
+* Better state placement
+
+---
+
+## 16. What is "Lifting State Up"?
+
+Lifting state up means moving shared state to the closest common parent of the components that need it.
+
+```text
+          Parent
+        State Here
+         /       \
+        ↓         ↓
+    Child A     Child B
+```
+
+The parent manages the state and passes the required data or update functions to its children.
+
+This keeps related components synchronized.
+
+---
+
+## 17. What is Reconciliation in React?
+
+Reconciliation is the process React uses to determine what needs to change in the UI after a render.
+
+Conceptually:
+
+```text
+Previous Tree
+      +
+New Tree
+      ↓
+Comparison
+      ↓
+Required Changes
+      ↓
+DOM Update
+```
+
+React uses information such as element types and `key` values to efficiently determine which elements need to be updated, added, or removed.
+
+---
+
+## 18. Why is the `key` prop important in Lists?
+
+The `key` prop gives each list item a stable identity.
+
+Example:
+
+```jsx
+users.map(user => (
+  <User
+    key={user.id}
+    user={user}
+  />
+));
+```
+
+Stable keys help React correctly identify items when a list is updated.
+
+```text
+List Items
+    ↓
+Stable Keys
+    ↓
+React identifies items
+    ↓
+Efficient reconciliation
+```
+
+Using array indexes as keys can cause problems when items are reordered, inserted, or removed.
+
+---
+
+## 19. What is Conditional Rendering?
+
+Conditional rendering means displaying different UI based on a condition.
+
+### Ternary Operator
+
+```jsx
+{isLoggedIn ? <Dashboard /> : <Login />}
+```
+
+### Logical AND
+
+```jsx
+{isAdmin && <AdminPanel />}
+```
+
+### Early Return
+
+```jsx
+if (loading) {
+  return <Loader />;
+}
+```
+
+Conditional rendering is commonly based on:
+
+* State
+* Props
+* Authentication
+* Loading status
+* Permissions
+
+---
+
+## 20. What is the difference between Controlled and Uncontrolled Components?
+
+### Controlled Component
+
+The input value is controlled by React state.
+
+```text
+User Input
+    ↓
+onChange
+    ↓
+React State
+    ↓
+value
+    ↓
+Input
+```
+
+Example:
+
+```jsx
+const [name, setName] = useState("");
+
+<input
+  value={name}
+  onChange={e => setName(e.target.value)}
+/>
+```
+
+### Uncontrolled Component
+
+The DOM manages the input value.
+
+```jsx
+const inputRef = useRef();
+
+<input ref={inputRef} />
+```
+
+The value can be accessed using:
+
+```jsx
+inputRef.current.value;
+```
+
+| Controlled                 | Uncontrolled                  |
+| -------------------------- | ----------------------------- |
+| React manages value        | DOM manages value             |
+| Uses state                 | Uses refs                     |
+| Easier to validate/control | Can be simpler for some cases |
+| React-driven               | DOM-driven                    |
+
+---
+
+## 21. How do you handle Forms in React?
+
+A common approach is to use controlled inputs.
+
+```jsx
+const [email, setEmail] = useState("");
+
+function handleSubmit(e) {
+  e.preventDefault();
+
+  console.log(email);
+}
+```
+
+Typical flow:
+
+```text
+User
+ ↓
+Input
+ ↓
+onChange
+ ↓
+React State
+ ↓
+Validation
+ ↓
+Submit
+ ↓
+API
+```
+
+For larger forms, libraries such as React Hook Form can simplify validation and form-state management.
+
+---
+
+## 22. What is React Router and how does client-side routing work?
+
+React Router is a library used for client-side routing in React applications.
+
+Example:
+
+```jsx
+<Routes>
+  <Route path="/" element={<Home />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/dashboard" element={<Dashboard />} />
+</Routes>
+```
+
+Conceptually:
+
+```text
+URL
+ ↓
+Router
+ ↓
+Matching Route
+ ↓
+React Component
+```
+
+Client-side navigation allows the application to change the displayed component without performing a traditional full-page navigation.
+
+---
+
+## 23. What is the difference between `<Link>` and `<a>`?
+
+### `<Link>`
+
+React Router's `<Link>` is used for client-side navigation.
+
+```jsx
+<Link to="/dashboard">
+  Dashboard
+</Link>
+```
+
+### `<a>`
+
+The normal HTML anchor performs standard browser navigation.
+
+```html
+<a href="/dashboard">Dashboard</a>
+```
+
+For internal routes in a React Router application, `<Link>` is generally preferred because it uses client-side navigation.
+
+---
+
+## 24. What are React Fragments?
+
+Fragments allow multiple elements to be grouped without adding an extra DOM element.
+
+```jsx
+<>
+  <h1>Hello</h1>
+  <p>Welcome</p>
+</>
+```
+
+Instead of:
+
+```jsx
+<div>
+  <h1>Hello</h1>
+  <p>Welcome</p>
+</div>
+```
+
+Fragments are useful when you need to return multiple elements without adding an unnecessary wrapper element to the DOM.
+
+---
+
+## 25. What is Context API and what are its limitations?
+
+Context API is React's built-in mechanism for sharing data across a component tree without manually passing props through every level.
+
+```text
+Provider
+   ↓
+Context Value
+   ↓
+Consumers
+```
+
+Common use cases:
+
+* Theme
+* Authentication
+* Language
+* Configuration
+
+### Limitation
+
+When a context value changes, components consuming that context may re-render.
+
+Therefore, putting frequently changing, large amounts of state into a single broad context can negatively affect performance and make the application harder to manage.
+
+---
+
+## 26. Redux vs Context API — when should you use each?
+
+Context is useful for relatively simple shared data such as:
+
+* Theme
+* Authentication information
+* Language
+
+Redux can be useful for more complex application-wide state where you need:
+
+* Structured state transitions
+* Middleware
+* Debugging tools
+* Complex update logic
+* Predictable state management
+
+The choice depends on the complexity and requirements of the application.
+
+---
+
+## 27. Explain Redux's core concepts: Store, Actions and Reducers.
+
+### Store
+
+The Store contains the application's state.
+
+### Action
+
+An Action describes what happened.
+
+```js
+{
+  type: "counter/increment"
+}
+```
+
+### Reducer
+
+A Reducer receives the current state and an action and determines the next state.
+
+```text
+Component
+    ↓
+dispatch(Action)
+    ↓
+Middleware
+    ↓
+Reducer
+    ↓
+Store
+    ↓
+Updated UI
+```
+
+Reducers should be predictable and free from side effects.
+
+---
+
+## 28. What is Redux Toolkit and why was it created?
+
+Redux Toolkit is the official recommended approach for writing Redux logic.
+
+It reduces boilerplate and provides utilities such as:
+
+* `configureStore`
+* `createSlice`
+* `createAsyncThunk`
+
+Example:
+
+```js
+const counterSlice = createSlice({
+  name: "counter",
+
+  initialState: {
+    value: 0
+  },
+
+  reducers: {
+    increment: state => {
+      state.value += 1;
+    }
+  }
+});
+```
+
+Redux Toolkit uses Immer internally, allowing immutable state updates to be written using a simpler mutable-looking syntax.
+
+---
+
+## 29. What is Redux Middleware?
+
+Middleware is code that runs between dispatching an action and the reducer processing it.
+
+```text
+dispatch(action)
+      ↓
+  Middleware
+      ↓
+    Reducer
+      ↓
+    Store
+```
+
+Middleware can be used for:
+
+* Async operations
+* Logging
+* Analytics
+* Error handling
+* Side effects
+
+For example, `redux-thunk` allows action creators to return functions, which can be used for asynchronous operations.
+
+---
+
+## 30. What is `React.memo` and when should you use it?
+
+`React.memo` memoizes a functional component.
+
+```jsx
+const User = React.memo(function User({ name }) {
+  return <h1>{name}</h1>;
+});
+```
+
+If the component receives the same props, React can skip an unnecessary re-render.
+
+It is useful when:
+
+* A component is expensive to render.
+* Its parent frequently re-renders.
+* Its props remain stable.
+* Profiling shows unnecessary rendering.
+
+It should not be used blindly on every component.
+
+---
+
+## 31. What causes unnecessary re-renders and how can you prevent them?
+
+Common causes include:
+
+### 1. New object references
+
+```jsx
+<Component data={{ name: "Pawan" }} />
+```
+
+A new object may be created on every render.
+
+### 2. New function references
+
+```jsx
+<Component onClick={() => doSomething()} />
+```
+
+### 3. Poor state placement
+
+Keeping state higher in the component tree than necessary can cause unrelated components to re-render.
+
+### Solutions:
+
+* `React.memo`
+* `useMemo`
+* `useCallback`
+* Keep state close to where it is needed
+* Avoid unnecessarily broad context updates
+
+---
+
+## 32. What are Code Splitting, `React.lazy`, and `Suspense`?
+
+Code splitting divides a large JavaScript bundle into smaller chunks that can be loaded when required.
+
+```text
+Large Bundle
+     ↓
+ ┌───┼──────┐
+ ↓   ↓      ↓
+Home Admin Profile
+```
+
+`React.lazy()` allows a component to be loaded lazily.
+
+```jsx
+const Dashboard = React.lazy(
+  () => import("./Dashboard")
+);
+```
+
+`Suspense` provides fallback UI while the lazy component is loading.
+
+```jsx
+<Suspense fallback={<Loader />}>
+  <Dashboard />
+</Suspense>
+```
+
+---
+
+## 33. What are Error Boundaries?
+
+Error Boundaries are React components that catch certain errors in their child component tree and display fallback UI instead of allowing the entire affected UI to fail.
+
+Conceptually:
+
+```text
+Error Boundary
+      │
+      ├── Header
+      ├── Dashboard
+      │      └── Error ❌
+      │
+      └── Footer
+```
+
+Traditional Error Boundaries use class component methods such as:
+
+```js
+getDerivedStateFromError()
+componentDidCatch()
+```
+
+They are useful for providing a controlled fallback experience when rendering errors occur.
+
+---
+
+## 34. What is the difference between `setX(value)` and `setX(prev => ...)`?
+
+If the next state depends on the previous state, using the functional updater is the safer approach.
+
+```jsx
+setCount(prev => prev + 1);
+```
+
+For example:
+
+```jsx
+setCount(prev => prev + 1);
+setCount(prev => prev + 1);
+```
+
+Each updater receives the appropriate previous state.
+
+### Rule
+
+```text
+New value does not depend on previous state
+              ↓
+         setX(value)
+
+New value depends on previous state
+              ↓
+      setX(prev => ...)
+```
+
+---
+
+## 35. How does React batch state updates?
+
+React can group multiple state updates together to reduce unnecessary rendering.
+
+For example:
+
+```jsx
+setFirstName("Pawan");
+setLastName("Bhatt");
+setAge(21);
+```
+
+Conceptually:
+
+```text
+Update 1 ─┐
+Update 2 ─┼──→ Batch → Render
+Update 3 ─┘
+```
+
+Batching can improve performance by reducing the number of rendering cycles.
+
+---
+
+## 36. What are React Portals?
+
+React Portals allow a component to render its DOM output into a different DOM node outside its normal parent DOM hierarchy.
+
+Example:
+
+```jsx
+createPortal(
+  <Modal />,
+  document.getElementById("modal-root")
+);
+```
+
+Conceptually:
+
+```text
+React Tree
+
+App
+ └── Dashboard
+      └── Modal
+
+
+DOM
+
+body
+ ├── #root
+ │    └── App
+ │
+ └── #modal-root
+      └── Modal
+```
+
+Portals are commonly used for:
+
+* Modals
+* Dialogs
+* Tooltips
+* Overlays
+
+---
+
+## 37. What is Server-Side Rendering (SSR) and how is it related to React/Next.js?
+
+SSR stands for **Server-Side Rendering**.
+
+With SSR, the server generates the initial HTML and sends it to the browser.
+
+```text
+Browser
+   ↓
+Server
+   ↓
+Generate HTML
+   ↓
+Browser receives HTML
+   ↓
+Hydration
+   ↓
+Interactive UI
+```
+
+Benefits can include:
+
+* Faster initial content display
+* Better SEO for appropriate pages
+* Server-side rendering and data-fetching capabilities
+
+Next.js provides server-rendering capabilities on top of React.
+
+---
+
+## 38. What is Hydration in the context of SSR?
+
+Hydration is the process where React takes server-rendered HTML and connects it to the client-side React application to make the UI interactive.
+
+```text
+Server
+  ↓
+HTML
+  ↓
+Browser
+  ↓
+Hydration
+  ↓
+Interactive React UI
+```
+
+During hydration, React attaches the necessary client-side behavior to the existing HTML.
+
+---
+
+## 39. What are Higher-Order Components (HOCs)?
+
+A Higher-Order Component is a function that takes a component and returns a new enhanced component.
+
+Example:
+
+```jsx
+const EnhancedComponent =
+  withAuth(UserComponent);
+```
+
+Conceptually:
+
+```text
+Component
+    ↓
+   HOC
+    ↓
+Enhanced Component
+```
+
+HOCs have historically been used for cross-cutting concerns such as:
+
+* Authentication
+* Logging
+* Permissions
+* Shared behavior
+
+Today, many use cases can be handled more simply using Custom Hooks and component composition.
+
+---
+
+## 40. What is the Render Props Pattern?
+
+The Render Props pattern is a technique where a component receives a function as a prop. That function determines what should be rendered.
+
+Example:
+
+```jsx
+<DataProvider
+  render={(data) => (
+    <UserList data={data} />
+  )}
+/>
+```
+
+Conceptually:
+
+```text
+Component
+    ↓
+Shared Logic / Data
+    ↓
+Render Function
+    ↓
+Consumer decides UI
+```
+
+Render Props were historically useful for sharing reusable logic. In modern React, Custom Hooks are often a simpler alternative.
+
+---
+
+## 41. How do you perform Data Fetching in React?
+
+Without a dedicated data-fetching library, `fetch` or `axios` can be used inside an effect.
+
+Typical flow:
+
+```text
+Component
+   ↓
+useEffect
+   ↓
+fetch / axios
+   ↓
+API
+   ↓
+Response
+   ↓
+State
+   ↓
+UI
+```
+
+Example:
+
+```jsx
+useEffect(() => {
+  async function fetchUsers() {
+    const response = await fetch("/api/users");
+    const data = await response.json();
+
+    setUsers(data);
+  }
+
+  fetchUsers();
+}, []);
+```
+
+A typical implementation manages:
+
+```text
+Loading
+Success
+Error
+```
+
+For larger applications, libraries such as TanStack Query or RTK Query can simplify server-state management.
+
+---
+
+## 42. What is React Query (TanStack Query) and why can it be better than manual `useEffect` fetching?
+
+TanStack Query is a data-fetching and caching library for managing server state.
+
+With manual fetching, you may need to implement:
+
+```text
+useEffect
+   ↓
+Fetch
+   ↓
+Loading
+   ↓
+Error
+   ↓
+Data
+   ↓
+Retry
+   ↓
+Cache
+```
+
+TanStack Query provides features such as:
+
+* Caching
+* Background refetching
+* Request deduplication
+* Retries
+* Stale/fresh state
+* Loading and error states
+* Query invalidation
+
+Example:
+
+```jsx
+const {
+  data,
+  isLoading,
+  error
+} = useQuery({
+  queryKey: ["users"],
+  queryFn: fetchUsers
+});
+```
+
+This can significantly reduce manual server-state management code.
+
+---
+
+## 43. What is RTK Query?
+
+RTK Query is the data-fetching and caching solution provided by Redux Toolkit.
+
+Typical flow:
+
+```text
+Component
+    ↓
+RTK Query Hook
+    ↓
+API Request
+    ↓
+Cache
+    ↓
+Component
+```
+
+After defining API endpoints, RTK Query can generate hooks for interacting with those endpoints.
+
+Example:
+
+```jsx
+const {
+  data,
+  isLoading
+} = useGetUsersQuery();
+```
+
+Features include:
+
+* API caching
+* Generated hooks
+* Loading/error states
+* Cache invalidation
+* Redux integration
+
+---
+
+## 44. What is `useEffect` Cleanup and how is it related to unmounting?
+
+An effect can return a cleanup function.
+
+```jsx
+useEffect(() => {
+  const id = setInterval(() => {
+    console.log("Running...");
+  }, 1000);
+
+  return () => {
+    clearInterval(id);
+  };
+}, []);
+```
+
+The cleanup function runs:
+
+1. Before the effect runs again because its dependencies changed.
+2. When the component unmounts.
+
+```text
+Effect Running
+     ↓
+Dependency Changes
+     ↓
+Previous Cleanup
+     ↓
+New Effect
+```
+
+And:
+
+```text
+Component
+   ↓
+Unmount
+   ↓
+Cleanup
+```
+
+Cleanup is commonly used for:
+
+* Removing event listeners
+* Clearing timers
+* Unsubscribing
+* Cancelling requests where appropriate
+
+---
+
+## 45. What is the role of PropTypes/TypeScript in React?
+
+PropTypes and TypeScript help define and validate the expected structure of component props.
+
+### TypeScript
+
+TypeScript provides compile-time type checking.
+
+```tsx
+type UserProps = {
+  name: string;
+  age: number;
+};
+
+function User({ name, age }: UserProps) {
+  return <h1>{name}</h1>;
+}
+```
+
+This can catch incorrect prop types during development.
+
+### Benefits:
+
+* Detects errors early
+* Better autocomplete
+* Easier refactoring
+* Documents component APIs
+* Improves maintainability
+
+TypeScript primarily provides compile-time checking, while PropTypes can provide runtime validation.
+
+---
+
+## 46. What is React DevTools used for?
+
+React DevTools is a browser extension used to inspect and debug React applications.
+
+It allows developers to inspect:
+
+```text
+Component Tree
+      ↓
+Props
+      ↓
+State
+      ↓
+Hooks
+      ↓
+Performance
+```
+
+It can be used for:
+
+* Inspecting components
+* Checking props and state
+* Debugging component hierarchy
+* Profiling performance
+* Identifying unnecessary renders
+
+---
+
+## 47. What is the difference between `useState` and `useReducer`?
+
+### `useState`
+
+Best suited for simple and independent state values.
+
+```jsx
+const [count, setCount] = useState(0);
+```
+
+### `useReducer`
+
+Useful when state logic becomes more complex.
+
+```jsx
+const [state, dispatch] = useReducer(
+  reducer,
+  initialState
+);
+```
+
+Flow:
+
+```text
+Component
+    ↓
+dispatch(action)
+    ↓
+Reducer
+    ↓
+New State
+    ↓
+UI Update
+```
+
+`useReducer` is useful when:
+
+* State has multiple related values.
+* State transitions are complex.
+* Multiple actions can update the same state.
+* Next state depends heavily on previous state.
+
+---
+
+## 48. How can you optimize rendering performance for large lists?
+
+Rendering thousands of items at once can be expensive.
+
+Instead of:
+
+```text
+10,000 Items
+     ↓
+Render Everything
+     ↓
+Large DOM Work
+```
+
+Virtualization can render only the items currently visible.
+
+```text
+10,000 Items
+     ↓
+Visible Items Only
+     ↓
+Render ~20–50 Items
+     ↓
+User Scrolls
+     ↓
+Render New Visible Items
+```
+
+Common techniques:
+
+### 1. Virtualization
+
+Use libraries such as `react-window` or similar virtualization solutions.
+
+### 2. Stable Keys
+
+```jsx
+key={item.id}
+```
+
+### 3. Memoized Rows
+
+```jsx
+React.memo(Row)
+```
+
+### 4. Avoid Unnecessary Calculations
+
+Use memoization when profiling shows it provides a real benefit.
+
+---
+
+## 49. What is the difference between CSR, SSR, and SSG?
+
+### CSR — Client-Side Rendering
+
+The browser receives a minimal HTML shell and JavaScript renders the application.
+
+```text
+Browser
+  ↓
+HTML Shell
+  ↓
+JavaScript
+  ↓
+React Render
+  ↓
+UI
+```
+
+### SSR — Server-Side Rendering
+
+The server generates HTML for a request.
+
+```text
+Browser
+   ↓
+Server
+   ↓
+Generate HTML
+   ↓
+Browser
+   ↓
+Hydration
+```
+
+### SSG — Static Site Generation
+
+Pages are generated during the build process.
+
+```text
+Build Time
+    ↓
+Generate HTML
+    ↓
+Static Files
+    ↓
+Users
+```
+
+### Comparison
+
+| CSR                     | SSR                         | SSG                                |
+| ----------------------- | --------------------------- | ---------------------------------- |
+| Rendered in browser     | Rendered on server          | Generated at build time            |
+| Highly interactive apps | Dynamic pages               | Static/content-heavy pages         |
+| Client JS is important  | Initial HTML from server    | Pre-generated HTML                 |
+| SEO needs consideration | Good for SEO-oriented pages | Good for SEO-oriented static pages |
+
+---
+
+## 50. How would you structure a mid-sized React project?
+
+A feature-based architecture is a useful approach for mid-sized React applications.
+
+Example:
+
+```text
+src/
+│
+├── app/
+│   ├── store/
+│   ├── router/
+│   └── providers/
+│
+├── features/
+│   │
+│   ├── auth/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── authSlice.ts
+│   │
+│   ├── dashboard/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── services/
+│   │
+│   └── profile/
+│       ├── components/
+│       ├── hooks/
+│       └── services/
+│
+├── components/
+│   ├── Button/
+│   ├── Modal/
+│   └── Navbar/
+│
+├── hooks/
+│   ├── useDebounce.ts
+│   └── useAuth.ts
+│
+├── services/
+│   └── api.ts
+│
+├── utils/
+│   ├── validation.ts
+│   └── formatters.ts
+│
+├── types/
+│   └── common.ts
+│
+└── main.tsx
+```
+
+### Architecture Overview
+
+```text
+                         React Application
+                                │
+                 ┌──────────────┴──────────────┐
+                 ↓                             ↓
+             Features                       Shared
+                 │                             │
+        ┌────────┼────────┐             ┌──────┼──────┐
+        ↓        ↓        ↓             ↓      ↓      ↓
+       Auth   Dashboard  Profile    Components Hooks Utils
+        │
+        ↓
+     Services / API
+        │
+        ↓
+      Backend
+        │
+        ↓
+     Database
+```
+
+### Benefits of Feature-Based Architecture
+
+A feature-based structure keeps related code together.
+
+For example, authentication-related:
+
+* Components
+* Hooks
+* API logic
+* State
+* Types
+
+can remain organized within the `auth` feature.
+
+This can make a growing project easier to navigate and maintain.
+
+---
+
+# Quick React Interview Revision
+
+## React Core
+
+```text
+React
+ ├── Components
+ ├── JSX
+ ├── Props
+ ├── State
+ ├── Hooks
+ └── Virtual DOM
+```
+
+## Important Hooks
+
+```text
+useState      → Local State
+useEffect     → Side Effects
+useContext    → Shared Context
+useRef        → Mutable Values / DOM
+useMemo       → Memoized Value
+useCallback   → Memoized Function
+useReducer    → Complex State Logic
+```
+
+## Performance
+
+```text
+React.memo
+     ↓
+useMemo
+     ↓
+useCallback
+     ↓
+Stable Keys
+     ↓
+Code Splitting
+     ↓
+Lazy Loading
+     ↓
+Virtualization
+```
+
+## Rendering
+
+```text
+CSR → Browser Rendering
+
+SSR → Server Rendering
+      ↓
+   Hydration
+
+SSG → Build-Time Rendering
+```
+
+## State Management
+
+```text
+Local State
+     ↓
+useState / useReducer
+     ↓
+Shared State
+     ↓
+Context / Redux
+     ↓
+Server State
+     ↓
+TanStack Query / RTK Query
+```
+
+## React Data Flow
+
+```text
+Parent
+   │
+   │ Props
+   ↓
+Child
+   │
+   │ Events / State Updates
+   ↓
+State
+   │
+   ↓
+API
+   │
+   ↓
+Backend
+   │
+   ↓
+Response
+   │
+   ↓
+State Update
+   │
+   ↓
+UI
+```
+
